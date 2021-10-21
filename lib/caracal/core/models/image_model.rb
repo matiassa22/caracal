@@ -72,7 +72,7 @@ module Caracal
         end
         
         def relationship_target
-          image_url || image_data
+          image_data || image_url
         end
         
         
@@ -97,9 +97,8 @@ module Caracal
           define_method "#{ m }" do |value|
             instance_variable_set("@image_#{ m }", value.to_s.to_sym)
           end
-        end        
-        
-        
+        end
+
         #=============== VALIDATION ==============================
         
         def valid?
@@ -115,7 +114,7 @@ module Caracal
         private
         
         def option_keys
-          [:url, :width, :height, :align, :top, :bottom, :left, :right]
+          [:url, :width, :height, :align, :top, :bottom, :left, :right, :data]
         end
         
         def pixels_to_emus(value, ppi)
