@@ -21,7 +21,8 @@ module Caracal
         const_set(:DEFAULT_TABLE_BORDER_COLOR,      'auto')
         const_set(:DEFAULT_TABLE_BORDER_LINE,       :single)
         const_set(:DEFAULT_TABLE_BORDER_SIZE,       0)          # units in 1/8 points
-        const_set(:DEFAULT_TABLE_BORDER_SPACING,    0)          
+        const_set(:DEFAULT_TABLE_BORDER_SPACING,    0)
+        const_set(:DEFAULT_TABLE_REPEAT_HEADER,     0)
         
         # accessors
         attr_reader :table_align
@@ -36,6 +37,8 @@ module Caracal
         attr_reader :table_border_right       # returns border model
         attr_reader :table_border_horizontal  # returns border model
         attr_reader :table_border_vertical    # returns border model
+        attr_reader :table_column_widths
+        attr_reader :table_repeat_header
         
         # initialization
         def initialize(options={}, &block)
@@ -44,6 +47,7 @@ module Caracal
           @table_border_line    = DEFAULT_TABLE_BORDER_LINE
           @table_border_size    = DEFAULT_TABLE_BORDER_SIZE
           @table_border_spacing = DEFAULT_TABLE_BORDER_SPACING
+          @table_repeat_header  = DEFAULT_TABLE_REPEAT_HEADER
           
           super options, &block
         end
@@ -60,7 +64,7 @@ module Caracal
         end
         
         def cols
-          rows.reduce([]) do |array, row|
+          @cols ||= rows.reduce([]) do |array, row|
             row.each_with_index do |cell, index|
               array[index]  = []    if array[index].nil?
               array[index] << cell
@@ -121,7 +125,7 @@ module Caracal
         #=============== SETTERS ==============================
         
         # integers
-        [:border_size, :border_spacing, :width].each do |m|
+        [:border_size, :border_spacing, :width, :repeat_header].each do |m|
           define_method "#{ m }" do |value|
             instance_variable_set("@table_#{ m }", value.to_i)
           end
@@ -147,6 +151,11 @@ module Caracal
           define_method "#{ m }" do |value|
             instance_variable_set("@table_#{ m }", value.to_s.to_sym)
           end
+        end
+
+        # column widths
+        def column_widths(value)
+          @table_column_widths = value.map(&:to_i) if value.is_a?(Array)
         end
         
         # .data
@@ -196,6 +205,8 @@ module Caracal
           k << [:data, :align, :width]
           k << [:border_color, :border_line, :border_size, :border_spacing]
           k << [:border_bottom, :border_left, :border_right, :border_top, :border_horizontal, :border_vertical]
+          k << [:column_widths]
+          k << [:repeat_header]
           k.flatten
         end
         
